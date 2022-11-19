@@ -27,13 +27,16 @@ class makeGraph {
             this.vertices = vertices;
         }
     }
-
+    /** Following graph can work for graph without cycle from source to destination */
     void makeEdges(Character src, Character des, int wgh) {
         Integer sr = src - 'A';
         Integer de = des - 'A';
         this.arr.get(sr).add(new pair(de, wgh));
+        /** Remove below line for DAG */
+        this.arr.get(de).add(new pair(sr, wgh));
     }
 
+    /** Prints Graph */
     void print() {
         for (int i = 0; i < this.vertices; i++) {
             System.out.print(i + " ");
@@ -62,8 +65,10 @@ public class Graph {
         Integer des = Y.charAt(0) - 'A';
         ArrayList<ArrayList<pair>> totalPath = new ArrayList<ArrayList<pair>>();
         ArrayList<pair> path = new ArrayList<pair>();
+        ArrayList<Integer> visited = new ArrayList<Integer>();
+        for(int i = 0; i < g.vertices; i++)visited.add(0);
 
-        dfs(g, totalPath, path, src, des, 0 );
+        dfs(g, totalPath, path, src, des, 0 , visited);
 
         int totalPathCount = totalPath.size(), totalDistance = 0;
         for(ArrayList<pair> it: totalPath){
@@ -71,29 +76,34 @@ public class Graph {
                 totalDistance += (Integer) it1.getValue();
             }
         }
-
         return (double) totalDistance / totalPathCount;
     }
-    private static void dfs(makeGraph g, ArrayList<ArrayList<pair>> totalPath, ArrayList<pair> path, Integer src, Integer des, Integer wgh) {
+    private static void dfs(makeGraph g, ArrayList<ArrayList<pair>> totalPath, ArrayList<pair> path,
+                            Integer src, Integer des, Integer wgh, ArrayList<Integer> visited) {
+        visited.set(src, 1);
         path.add(new pair(src, wgh));
         if(src.equals(des)){
             totalPath.add(new ArrayList<pair>(path));
         }
 
         for(pair p : g.arr.get(src)){
-            int a = (Integer) p.a;
-            int b = (Integer) p.b;
-            dfs(g, totalPath, path, a, des, b);
+            if(visited.get((Integer) p.a).equals(0)) {
+                int a = (Integer) p.a;
+                int b = (Integer) p.b;
+                dfs(g, totalPath, path, a, des, b, visited);
+            }
         }
-
+        visited.set(src, 0);
         path.remove(path.size() - 1);
     }
+
     public static void main(String[] args) {
-            Integer vertices = 5;
-            makeGraph g = new makeGraph(vertices);
-            makeConnection(g);
-            Double ans = calculateAverageDistanceBetweenTwoPoints("A",  "C", g);
-            System.out.print(ans);
-            System.out.println();
-       }
+        Integer vertices = 5;
+        makeGraph g = new makeGraph(vertices);
+        makeConnection(g);
+        Double ans = calculateAverageDistanceBetweenTwoPoints("A",  "C", g);
+        System.out.print(ans);
+        System.out.println();
+    }
+
 }
